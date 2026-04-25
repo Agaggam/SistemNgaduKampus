@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SIPADU UMM — Sistem Pengaduan Digital Kampus</title>
+  <meta name="description" content="Sistem Informasi Pengaduan Digital Universitas Muhammadiyah Malang — Laporkan, Lacak, dan Pantau Pengaduan secara Real-Time." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/views.css" />
+</head>
+<body>
+<div id="app">
+
+  <!-- ===== LOGIN SCREEN ===== -->
+  <div id="login-screen">
+    <div class="login-bg">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </div>
+    <div class="login-wrap">
+      <!-- Left Panel -->
+      <div class="login-left">
+        <div class="brand-row">
+          <div class="brand-icon"><i class="fas fa-shield-halved"></i></div>
+          <div>
+            <div class="brand-name">SIPADU</div>
+            <div class="brand-sub">Universitas Muhammadiyah Malang</div>
+          </div>
+        </div>
+        <h1 class="login-title">Suara Mahasiswa,<br/><span>Didengar & Ditindak</span></h1>
+        <p class="login-desc">Platform pengaduan digital kampus yang transparan, aman, dan responsif. Setiap laporan Anda berarti.</p>
+        <div class="feat-grid">
+          <div class="feat-item"><i class="fas fa-lock"></i><span>Enkripsi End-to-End</span></div>
+          <div class="feat-item"><i class="fas fa-eye-slash"></i><span>Mode Anonim</span></div>
+          <div class="feat-item"><i class="fas fa-bolt"></i><span>SLA 24 Jam</span></div>
+          <div class="feat-item"><i class="fas fa-chart-line"></i><span>Tracking Real-Time</span></div>
+          <div class="feat-item"><i class="fas fa-route"></i><span>Smart Routing</span></div>
+          <div class="feat-item"><i class="fas fa-star"></i><span>Rating & KPI</span></div>
+        </div>
+        <div class="login-stats">
+          <div class="ls-item"><span class="ls-num">2,847</span><span class="ls-lbl">Laporan Selesai</span></div>
+          <div class="ls-div"></div>
+          <div class="ls-item"><span class="ls-num">98%</span><span class="ls-lbl">Kepuasan</span></div>
+          <div class="ls-div"></div>
+          <div class="ls-item"><span class="ls-num">4.2j</span><span class="ls-lbl">Rata-rata SLA</span></div>
+        </div>
+      </div>
+
+      <!-- Right Panel (Card) -->
+      <div class="login-right">
+        <div class="login-card">
+          <div class="sso-badge"><i class="fas fa-shield-check"></i> Terproteksi SSO Kampus</div>
+          <h2>Masuk ke SIPADU</h2>
+          <p class="card-sub">Gunakan akun akademik UMM Anda</p>
+
+          <div class="form-grp">
+            <label><i class="fas fa-id-card"></i> NIM / Email Kampus</label>
+            <input type="text" id="inp-nim" class="inp" placeholder="202110370311001 atau @umm.ac.id" />
+          </div>
+          <div class="form-grp">
+            <label><i class="fas fa-lock"></i> Password</label>
+            <div class="inp-wrap">
+              <input type="password" id="inp-pass" class="inp" placeholder="Password SSO Anda" />
+              <button class="eye-btn" id="eye-btn" onclick="togglePass()"><i class="fas fa-eye" id="eye-ico"></i></button>
+            </div>
+          </div>
+          <div class="form-grp">
+            <label><i class="fas fa-user-tag"></i> Login Sebagai</label>
+            <div class="role-row" id="role-row">
+              <button class="role-btn active" data-role="mahasiswa" onclick="pickRole(this)"><i class="fas fa-user-graduate"></i> Mahasiswa</button>
+              <button class="role-btn" data-role="petugas" onclick="pickRole(this)"><i class="fas fa-user-tie"></i> Petugas</button>
+              <button class="role-btn" data-role="manajemen" onclick="pickRole(this)"><i class="fas fa-user-shield"></i> Manajemen</button>
+            </div>
+          </div>
+
+          <button class="btn-primary w-full" id="btn-login" onclick="doLogin()">
+            <span id="login-txt"><i class="fas fa-sign-in-alt"></i> Masuk dengan SSO</span>
+            <span id="login-load" class="hidden"><i class="fas fa-spinner fa-spin"></i> Memverifikasi SSO...</span>
+          </button>
+          <div class="or-divider"><span>atau</span></div>
+          <button class="btn-ghost w-full" onclick="doAnon()"><i class="fas fa-user-secret"></i> Laporkan Secara Anonim</button>
+          <p class="note-txt"><i class="fas fa-info-circle"></i> Laporan anonim dienkripsi dan tidak dapat dilacak ke identitas Anda.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN APP ===== -->
+  <div id="main-app" class="hidden">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sb-header">
+        <div class="sb-logo">
+          <div class="sb-logo-icon"><i class="fas fa-shield-halved"></i></div>
+          <div class="sb-logo-txt">
+            <span class="sb-name">SIPADU</span>
+            <span class="sb-uni">UMM</span>
+          </div>
+        </div>
+        <button class="sb-toggle" onclick="toggleSidebar()"><i class="fas fa-chevron-left" id="sb-chevron"></i></button>
+      </div>
+
+      <div class="sb-user" id="sb-user">
+        <div class="sb-avatar" id="sb-avatar">M</div>
+        <div class="sb-uinfo">
+          <div class="sb-uname" id="sb-uname">Loading...</div>
+          <div class="sb-urole" id="sb-urole">Mahasiswa</div>
+        </div>
+      </div>
+
+      <nav class="sb-nav" id="sb-nav"></nav>
+
+      <div class="sb-footer">
+        <button class="btn-logout" onclick="doLogout()">
+          <i class="fas fa-sign-out-alt"></i><span>Keluar</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-cnt" id="main-cnt">
+      <header class="topbar">
+        <div class="tb-left">
+          <button class="mob-menu" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+          <div class="breadcrumb" id="breadcrumb"><i class="fas fa-home"></i> Dashboard</div>
+        </div>
+        <div class="tb-right">
+          <div class="tb-clock" id="tb-clock">--:--</div>
+          <div class="notif-wrap" onclick="navigate('notifikasi')">
+            <button class="notif-btn"><i class="fas fa-bell"></i></button>
+            <span class="notif-dot" id="notif-dot">3</span>
+          </div>
+          <div class="tb-avatar" id="tb-avatar">M</div>
+        </div>
+      </header>
+      <div class="view-box" id="view-box"></div>
+    </main>
+  </div>
+
+</div><!-- #app -->
+
+<!-- Toast -->
+<div id="toasts"></div>
+<!-- Modal -->
+<div id="modal-overlay" class="modal-overlay" onclick="closeModal()"></div>
+<div id="modal-box" class="modal-box hidden"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
