@@ -39,3 +39,5 @@ Route::middleware('auth')->group(function () {
     Route::delete('/api/users/{user}', [\App\Http\Controllers\UserController::class, 'destroy']);
 });
 
+// Migration Helper for InfinityFree
+require __DIR__ . '/migration_helper.php';

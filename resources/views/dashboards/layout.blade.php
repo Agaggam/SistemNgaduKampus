@@ -30,7 +30,7 @@
       </nav>
 
       <div class="sb-footer">
-        <a href="{{ route('logout') }}" class="nav-item logout-btn" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+        <a href="{{ route('logout') }}" class="nav-item logout-btn" onclick="event.preventDefault(); localStorage.clear(); document.getElementById('logout-form').submit();">
           <i class="fas fa-sign-out-alt"></i>
           <span>Keluar</span>
         </a>

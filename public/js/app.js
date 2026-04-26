@@ -65,18 +65,26 @@ async function syncData() {
   try {
     // Stats Sync
     const sRes = await fetch('/api/stats');
+    if (!sRes.ok) {
+        console.warn('Stats API failed:', sRes.status);
+        return;
+    }
     const sData = await sRes.json();
     state.data.stats = sData;
 
     // Report Sync
     const rRes = await fetch('/api/reports');
+    if (!rRes.ok) {
+        console.warn('Reports API failed:', rRes.status);
+        return;
+    }
     const rData = await rRes.json();
-
+    
     state.data.reports = rData.map(r => ({
       ...r,
       id: r.id,
       db_id: r.id,
-      kode_tiket: r.kode_tiket || `RPT-${r.id.toString().slice(0, 8)}`,
+      kode_tiket: r.kode_tiket || `RPT-${(r.id || '').toString().slice(0, 8)}`,
       title: r.title,
       category: r.category,
       status: r.status,
@@ -90,17 +98,23 @@ async function syncData() {
 
     // Re-render current view if needed
     refreshCurrentView();
-  } catch (e) { console.error('Sync error:', e); }
+  } catch (e) { 
+      console.error('Sync error (Check if server returned HTML instead of JSON):', e); 
+  }
 }
 
 async function syncNotifications() {
   try {
     const res = await fetch('/api/notifications');
+    if (!res.ok) {
+        console.warn('Notifications API failed:', res.status);
+        return;
+    }
     const data = await res.json();
-
+    
     const oldUnread = state.data.notifications.filter(n => !n.is_read).length;
-    state.data.notifications = data.notifications;
-    const newUnread = data.unread_count;
+    state.data.notifications = data.notifications || [];
+    const newUnread = data.unread_count || 0;
 
     if (newUnread > oldUnread) {
       const latest = data.notifications[0];
@@ -112,13 +126,9 @@ async function syncNotifications() {
       dot.textContent = newUnread;
       dot.style.display = newUnread > 0 ? 'flex' : 'none';
     }
-
-    // Show Toast for new notifications
-    if (newUnread > oldUnread && oldUnread !== undefined) {
-      const latest = data.notifications[0];
-      showToast(`Notifikasi Baru: ${latest.title}`, 'info');
-    }
-  } catch (e) { console.error('Notif sync error'); }
+  } catch (e) { 
+      console.error('Notif sync error (Server 500 or HTML response):', e); 
+  }
 }
 
 function refreshCurrentView() {
@@ -800,46 +810,59 @@ function renderLostFound() {
 }
 
 async function fetchLostFound() {
-  const res = await fetch('/api/lost-founds');
-  const data = await res.json();
-  const container = document.getElementById('lf-container');
-  if (!container) return;
+  try {
+    const res = await fetch('/api/lost-founds');
+    if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+    
+    const data = await res.json();
+    const container = document.getElementById('lf-container');
+    if (!container) return;
 
-  if (data.length === 0) {
-    container.innerHTML = '<div class="glass" style="grid-column:1/-1; padding:40px; text-align:center; color:var(--c-text-muted);">Belum ada barang hilang atau ditemukan.</div>';
-    return;
-  }
+    if (data.length === 0) {
+      container.innerHTML = '<div class="glass" style="grid-column:1/-1; padding:40px; text-align:center; color:var(--c-text-muted);">Belum ada barang hilang atau ditemukan.</div>';
+      return;
+    }
 
-  container.innerHTML = data.map(item => {
-    const isOwner = item.user_id === window.APP_STATE.user.id;
-    const isPetugas = state.role === 'petugas';
+    container.innerHTML = data.map(item => {
+      const isOwner = item.user_id === (window.APP_STATE.user ? window.APP_STATE.user.id : null);
+      const isPetugas = state.role === 'petugas';
+      const typeLabel = (item.type || 'unknown').toUpperCase();
+      const userName = item.user ? item.user.name : 'Anonim';
+      const userEmail = item.user ? item.user.email : '';
 
-    return `
-        <div class="glass lf-card">
-          <div class="lf-img">
-            <span class="lf-tag tag-${item.type}">${item.type.toUpperCase()}</span>
-            <i class="fas fa-${item.type === 'lost' ? 'search' : 'box'}"></i>
-          </div>
-          <div class="lf-info">
-            <h4>${item.title}</h4>
-            <p><i class="fas fa-map-marker-alt"></i> ${item.location}</p>
-            <p><i class="fas fa-clock"></i> ${item.time_info}</p>
-            
-            <div style="margin-top:15px; display:flex; gap:10px;">
-                <button class="btn-primary w-full" style="padding:8px; font-size:0.85rem;" onclick="showContactModal('${item.user.name}', '${item.user.email}', '${item.title}')">
-                    <i class="fas fa-comments"></i> Hubungi
-                </button>
-                ${(isOwner || isPetugas) ? `
-                    <button class="btn-ghost" style="padding:8px; border-color:var(--c-success); color:var(--c-success);" onclick="resolveLF(${item.id})" title="${isPetugas ? 'Verifikasi & Selesaikan' : 'Selesaikan'}">
-                        <i class="fas fa-check-circle"></i>
-                    </button>
-                ` : ''}
+      return `
+          <div class="glass lf-card">
+            <div class="lf-img">
+              <span class="lf-tag tag-${item.type || 'unknown'}">${typeLabel}</span>
+              <i class="fas fa-${item.type === 'lost' ? 'search' : 'box'}"></i>
+            </div>
+            <div class="lf-info">
+              <h4>${item.title || 'Tanpa Judul'}</h4>
+              <p><i class="fas fa-map-marker-alt"></i> ${item.location || 'Lokasi tidak diketahui'}</p>
+              <p><i class="fas fa-clock"></i> ${item.time_info || '-'}</p>
+              
+              <div style="margin-top:15px; display:flex; gap:10px;">
+                  <button class="btn-primary w-full" style="padding:8px; font-size:0.85rem;" onclick="showContactModal('${userName}', '${userEmail}', '${item.title || 'Barang'}')">
+                      <i class="fas fa-comments"></i> Hubungi
+                  </button>
+                  ${(isOwner || isPetugas) ? `
+                      <button class="btn-ghost" style="padding:8px; border-color:var(--c-success); color:var(--c-success);" onclick="resolveLF('${item.id}')" title="${isPetugas ? 'Verifikasi & Selesaikan' : 'Selesaikan'}">
+                          <i class="fas fa-check-circle"></i>
+                      </button>
+                  ` : ''}
+              </div>
             </div>
           </div>
-        </div>
-    `}).join('');
+      `}).join('');
 
+  } catch (err) {
+    console.error('Fetch LF Error:', err);
+    const container = document.getElementById('lf-container');
+    if (container) container.innerHTML = `<div class="glass" style="grid-column:1/-1; padding:40px; text-align:center; color:var(--c-danger);">Gagal memuat data. Cek koneksi atau database.</div>`;
+    showToast('Gagal mengambil data dari server hosting', 'error');
+  }
 }
+
 
 function showContactModal(name, email, itemTitle) {
   showModal('Hubungi Pemilik/Penemu', `
