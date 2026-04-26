@@ -1,7 +1,7 @@
-# NgaduKampus UMM 🛡️🏛️
+# NgaduKampus UMM 
 Sistem Informasi Pengaduan & Keamanan Kampus Terpadu berbasis Laravel & Vanilla JS.
 
-## 🚀 Fitur Utama
+## Fitur Utama
 - **Smart Complaint**: Auto-kategori berbasis teks & Auto-save draf.
 - **Lost & Found Center**: Katalog barang hilang/temu dengan fitur resolusi.
 - **Panic Button (SOS)**: Sinyal darurat real-time dengan koordinat GPS.
@@ -10,7 +10,7 @@ Sistem Informasi Pengaduan & Keamanan Kampus Terpadu berbasis Laravel & Vanilla 
 
 ---
 
-## 🧪 Hasil Pengujian Kualitas (Testing Report)
+## Hasil Pengujian Kualitas (Testing Report)
 
 | Aspek Kualitas | Fitur / Fungsi | Skenario Uji | Status | Hasil yang Diharapkan |
 | :--- | :--- | :--- | :---: | :--- |
@@ -28,7 +28,7 @@ Sistem Informasi Pengaduan & Keamanan Kampus Terpadu berbasis Laravel & Vanilla 
 
 ---
 
-## 🛠️ Cara Instalasi (Local)
+## Cara Instalasi (Local)
 1. Clone repository
 2. Jalankan `composer install`
 3. Salin `.env.example` ke `.env` & sesuaikan DB
@@ -36,7 +36,7 @@ Sistem Informasi Pengaduan & Keamanan Kampus Terpadu berbasis Laravel & Vanilla 
 5. Jalankan `php artisan migrate --seed`
 6. Jalankan `php artisan serve`
 
-## ☁️ Deployment (Hosting)
+## Deployment (Hosting)
 Untuk deployment di shared hosting (seperti InfinityFree), gunakan helper yang tersedia:
 - `/migrasi-aman-bos` : Menjalankan migrasi tanpa SSH.
 - `/link-storage-bos` : Membuat symbolic link folder storage.
